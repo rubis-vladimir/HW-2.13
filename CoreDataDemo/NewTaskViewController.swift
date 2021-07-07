@@ -39,11 +39,7 @@ final class NewTaskViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         
         button.layer.cornerRadius = 4
-        if taskTextField.text == "" {
-            button.addTarget(self, action: #selector(save), for: .touchUpInside)
-        } else {
-            button.addTarget(self, action: #selector(update), for: .touchUpInside)
-        }
+        button.addTarget(self, action: #selector(save), for: .touchUpInside)
         
         return button
     }()
@@ -106,24 +102,16 @@ final class NewTaskViewController: UIViewController {
         ])
     }
     
-    @objc private func update() {
-        guard let text = taskTextField.text else { return }
-        self.task?.title = text
-        
-        do {
-            try viewContext.save()
-        } catch let error {
-            print(error)
-        }
-        dismiss(animated: true)
-    }
-    
     @objc private func save() {
         guard let text = taskTextField.text else { return }
-        guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: viewContext) else { return }
-        guard let task = NSManagedObject(entity: entityDescription, insertInto: viewContext) as? Task else { return }
-        task.title = text
         
+        if self.task != nil {
+            self.task?.title = text
+        } else {
+            guard let entityDescription = NSEntityDescription.entity(forEntityName: "Task", in: viewContext) else { return }
+            guard let task = NSManagedObject(entity: entityDescription, insertInto: viewContext) as? Task else { return }
+            task.title = text
+        }
         if viewContext.hasChanges {
             do {
                 try viewContext.save()
@@ -133,7 +121,6 @@ final class NewTaskViewController: UIViewController {
         }
         dismiss(animated: true)
     }
-    
     
     @objc private func cancel() {
         dismiss(animated: true)
